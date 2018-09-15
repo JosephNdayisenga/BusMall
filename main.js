@@ -12,7 +12,10 @@ let Image = function(name, filePath, id) {
     this.addClicks;
 }
 
-//instanitiating new image object
+if(localStorage.length > 0){
+    let getData = localStorage.getItem("storageBusMallImgArray");
+    BusMallImageArray = JSON.parse(getData);
+} else {
 
 let Bag = new Image ("Bag", "./assets/bag.jpg", "bag");
 let Banana = new Image ("Banana", "./assets/banana.jpg", "banana");
@@ -25,6 +28,9 @@ let Cthulhu = new Image ("Cthulhu", "./assets/cthulhu.jpg", "cthulhu");
 let Dragon = new Image ("Dragon", "./assets/dragon.jpg", "dragon");
 
 BusMallImageArray.push(Bag, Banana, Bathroom, Boots, Breakfast, Bubblegum, Chair, Cthulhu, Dragon);
+  
+}
+
 
 
 // let create a function that will select a random image from the array
@@ -41,20 +47,29 @@ let randomImage = function () {
 function imageClicked(e) {
     if (e.target.id === firstImage.id) {
         firstImage.clicked += 1;
-    } else if (e.target.id === secondImage) {
+    } else if (e.target.id === secondImage.id) {
         secondImage.clicked += 1;
-    } else if (e.target.id === thirdImage) {
+    } else if (e.target.id === thirdImage.id) {
         thirdImage.clicked += 1;
     }
 
     displayImages();
-    console.log("e.target", e.target);
-    console.log("e", firstImage.clicked, secondImage.clicked, thirdImage.clicked);
+
+    totalImageClicked += 1
+  
+   localStorage.setItem("storageBusMallImgArray", JSON.stringify(BusMallImageArray));
+
+   if(totalImageClicked > 25){
+    elImageRandom.innerHTML = "";
+    displayChart();
+   }
+   
 }
 
 let firstImage;
 let secondImage;
 let thirdImage;
+let totalImageClicked = 0;
 
 // define function that will display random images
 
@@ -63,24 +78,29 @@ function displayImages() {
     elImageRandom.innerHTML = "";
     
     for(let i = 0; i < 3; i++) {
-        let elImage = document.createElement("img");
         let imageObject = randomImage();
-        elImageRandom.appendChild(elImage);
-        elImage.setAttribute("id", imageObject.id);
-        elImage.src = imageObject.filePath;
-        elImage.addEventListener("click", imageClicked);
-        imageObject.shown += 1;
 
         if(i === 0) {
             firstImage = imageObject;
         } else if(i === 1) {
+            while(imageObject.id === firstImage.id){
+                imageObject = randomImage();
+                console.log("second while", imageObject.id);
+            }
             secondImage = imageObject;
         } else {
+            while(imageObject.id === firstImage.id || imageObject.id === secondImage.id){
+                imageObject = randomImage();
+                console.log("third while", imageObject.id);
+            }
             thirdImage = imageObject;
         }
+        let elImage = document.createElement("img");
+        elImageRandom.appendChild(elImage).setAttribute("id", imageObject.id);
+        elImage.src = imageObject.filePath;
+        elImage.addEventListener("click", imageClicked);
+        imageObject.shown += 1;
     }
 }
 
 displayImages();
-console.log(elImageRandom);
-console.log("images", firstImage, secondImage, thirdImage);
